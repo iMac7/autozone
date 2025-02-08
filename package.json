@@ -1,0 +1,13 @@
+{
+  "name": "autozone",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "start": "pnpm -r start"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "packageManager": "pnpm@9.0.6+sha1.648f6014eb363abb36618f2ba59282a9eeb3e879"
+}

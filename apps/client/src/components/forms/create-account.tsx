@@ -1,0 +1,244 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { account, MetadataAttributeType } from "@lens-protocol/metadata";
+import { useWalletClient } from "wagmi";
+import { client } from "@/utils/client";
+import { storageClient } from "@/utils/storageclient";
+import { createAccountWithUsername } from "@lens-protocol/client/actions";
+import { handleWith } from "@lens-protocol/client/viem";
+import { sendGraphQLQuery } from "@/utils/query";
+import { walletClient } from "@/utils/viem";
+
+const accountFormSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    bio: z.string(),
+    picture: z.string().optional(),
+    coverPicture: z.string().optional(),
+    twitter: z.string().optional(),
+});
+
+type AccountFormValues = z.infer<typeof accountFormSchema>;
+
+export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: boolean) => void }) {
+    //   const { data: walletClient } = useWalletClient();
+
+    const [step, setStep] = useState<
+        "initial" | "metadata" | "uploading" | "deploying" | "success"
+    >("initial");
+    const [error, setError] = useState<string | null>(null);
+
+    const form = useForm<AccountFormValues>({
+        resolver: zodResolver(accountFormSchema),
+        defaultValues: {
+            name: "",
+            bio: "",
+            picture: "",
+            coverPicture: "",
+            twitter: "",
+        },
+    });
+
+    const onSubmit = async (data: AccountFormValues) => {
+        try {
+            // Step 1: Login as onboarding user
+            const authenticated = await client.login({
+                onboardingUser: {
+                    app: "0xe5439696f4057aF073c0FB2dc6e5e755392922e1",
+                    wallet: walletClient?.account.address as string,
+                },
+                signMessage: (message) => walletClient?.signMessage({ message }),
+            });
+
+            if (authenticated.isErr()) {
+                throw new Error(authenticated.error.message);
+            }
+
+            const sessionClient = authenticated.value;
+
+            // Step 2: Create and upload metadata
+            setStep("uploading");
+            const metadata = account({
+                name: data.name,
+                bio: data.bio,
+                // picture: data.picture || undefined,
+                // coverPicture: data.coverPicture || undefined,
+            });
+
+            // Store metadata in localStorage for recovery
+            localStorage.setItem("lens_account_metadata", JSON.stringify(metadata));
+
+            const { uri } = await storageClient.uploadAsJson(metadata);
+            localStorage.setItem("lens_account_uri", uri);
+
+            // Step 3: Deploy account contract
+            setStep("deploying");
+            const result = await createAccountWithUsername(sessionClient, {
+                username: { localName: data.name.toLowerCase().replace(/[^a-z0-9]/g, "") },
+                metadataUri: uri,
+            }).andThen(handleWith(walletClient));
+
+            if (result.isErr()) {
+                throw new Error(result.error.message);
+            }
+
+            // Step 4: Query account details and switch to account owner
+            const accountQuery =
+                `
+          query GetAccount($txHash: ${result.value.txHash}) {
+            account(request: { txHash: $txHash }) {
+              address
+            }
+          }
+        `
+            // variables: { txHash: result.value.txHash },
+            const accountQueryResult = await sendGraphQLQuery(accountQuery)
+            console.log('accountQueryResult=>', accountQueryResult)
+
+            if (accountQueryResult.data.errors.length) {
+                throw new Error(accountQueryResult.data.errors[0].message)
+            }
+
+            // const accountAddress = accountQueryResult.data.account.address
+            // await changeAuth(accountAddress)
+
+
+
+            //   setStep("success");
+
+            // Clear localStorage after successful creation
+            //   localStorage.removeItem("lens_account_metadata");
+            //   localStorage.removeItem("lens_account_uri");
+
+        } catch (err) {
+            setError(err.message);
+            setStep("metadata");
+        }
+    };
+
+    if (step === "initial") {
+        return (
+            <div className="w-full">
+                <Button
+                    className="w-full"
+                    onClick={() => setStep("metadata")}
+                >
+                    Log in as Onboarding User
+                </Button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-[30rem] p-6 max-w-[30rem] border-2 border-gray-300 relative rounded-lg">
+
+            <p className="text-2xl font-bold mb-6 underline">Create Account</p>
+            <Button
+                className="absolute top-2 right-2"
+                onClick={() => setCreateAccount(false)}
+            >
+                Back
+            </Button>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="bio"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Bio</FormLabel>
+                                <FormControl>
+                                    <Textarea {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="picture"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Profile Picture URL</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="coverPicture"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Cover Picture URL</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="twitter"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Twitter URL</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {error && (
+                        <div className="text-red-500 text-sm">{error}</div>
+                    )}
+
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={step === "uploading" || step === "deploying" || step === "success"}
+                    >
+                        {step === "metadata" && "Create Account"}
+                        {step === "uploading" && "Uploading Account Metadata..."}
+                        {step === "deploying" && "Deploying Account Contract..."}
+                        {step === "success" && "Authentication Success"}
+                    </Button>
+                </form>
+            </Form>
+        </div>
+    );
+}
