@@ -3,7 +3,9 @@ import { evmAddress } from "@lens-protocol/client";
 import { currentSession, fetchTimeline } from "@lens-protocol/client/actions";
 import { Button } from "@/components/ui/button";
 import { useCredentialStore } from "@/store/store";
-import { getSession } from "@/utils/auth/auth";
+import { checkAuthStatus, getSession } from "@/utils/auth/auth";
+import { app_address } from "@/utils/env";
+
 
 export default function Timeline() {
     const lens_address = useCredentialStore(state => state.lens_address)
@@ -16,10 +18,8 @@ export default function Timeline() {
         const result = await fetchTimeline(client, {
             account: evmAddress(lens_address!),
             filter: {
-              feeds: [
-                {
-                  globalFeed: true,
-                },
+              apps: [
+                evmAddress(app_address),
               ],
             },
           });
@@ -32,11 +32,7 @@ export default function Timeline() {
         console.log('tl items=', items)
     }
 
-    async function checkAuthStatus() {
-        const sessionClient = await getSession()
-        const result = await sessionClient!.getAuthenticatedUser()
-        console.log('auth status=', result)
-    }
+    
 
 
 

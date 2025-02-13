@@ -21,6 +21,9 @@ import { createAccountWithUsername } from "@lens-protocol/client/actions";
 import { handleWith } from "@lens-protocol/client/viem";
 import { sendGraphQLQuery } from "@/utils/query";
 import { walletClient } from "@/utils/viem";
+import { app_address } from "@/utils/env";
+import { signMessage } from "@wagmi/core";
+import { config } from "@/contexts/WagmiContext";
 
 const accountFormSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -33,8 +36,6 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: boolean) => void }) {
-    //   const { data: walletClient } = useWalletClient();
-
     const [step, setStep] = useState<
         "initial" | "metadata" | "uploading" | "deploying" | "success"
     >("initial");
@@ -56,10 +57,10 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
             // Step 1: Login as onboarding user
             const authenticated = await client.login({
                 onboardingUser: {
-                    app: "0xe5439696f4057aF073c0FB2dc6e5e755392922e1",
+                    app: app_address,
                     wallet: walletClient?.account.address as string,
                 },
-                signMessage: (message) => walletClient?.signMessage({ message }),
+                signMessage: (message) => signMessage(config, { message }),
             });
 
             if (authenticated.isErr()) {
@@ -69,24 +70,27 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
             const sessionClient = authenticated.value;
 
             // Step 2: Create and upload metadata
-            setStep("uploading");
-            const metadata = account({
-                name: data.name,
-                bio: data.bio,
-                // picture: data.picture || undefined,
-                // coverPicture: data.coverPicture || undefined,
-            });
+            // setStep("uploading");
+            // const metadata = account({
+            //     name: data.name,
+            //     bio: data.bio,
+            //     // picture: data.picture || undefined,
+            //     // coverPicture: data.coverPicture || undefined,
+            // });
 
-            // Store metadata in localStorage for recovery
-            localStorage.setItem("lens_account_metadata", JSON.stringify(metadata));
+            // // Store metadata in localStorage for recovery
+            // localStorage.setItem("lens_account_metadata", JSON.stringify(metadata));
 
-            const { uri } = await storageClient.uploadAsJson(metadata);
-            localStorage.setItem("lens_account_uri", uri);
+            // const { uri } = await storageClient.uploadAsJson(metadata);
+            // localStorage.setItem("lens_account_uri", uri);
+
+            // const uri = "lens://3623ccbb4d061f4454ecdd22c3dc2224f2bf67f0e0df84c198ee71762f3c2455"
+            const uri = 'lens://624084ae4d89c3172e9a2cd335194790b017842a8194e366e2b1bc3281ee4f45'
 
             // Step 3: Deploy account contract
             setStep("deploying");
             const result = await createAccountWithUsername(sessionClient, {
-                username: { localName: data.name.toLowerCase().replace(/[^a-z0-9]/g, "") },
+                username: { localName: "carguyy1"},
                 metadataUri: uri,
             }).andThen(handleWith(walletClient));
 
@@ -127,6 +131,47 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
             setStep("metadata");
         }
     };
+
+    // async function create_account_with_username(
+    //     localName: string,
+    //     metadataUri: string,
+    //     accountManager: string[]
+    // ) {
+    //     const query = `
+    //     mutation {
+    //         createAccountWithUsername(
+    //             request: {
+    //                 username: {
+    //                     localName: "${localName}"
+    //                 }
+    //                 metadataUri: "${metadataUri}"
+    //                 accountManager: ${JSON.stringify(accountManager)}
+    //             }
+    //         ) {
+    //             ... on CreateAccountResponse {
+    //                 hash
+    //             }
+    //             ... on SponsoredTransactionRequest {
+    //                 id
+    //                 request
+    //             }
+    //             ... on SelfFundedTransactionRequest {
+    //                 request
+    //             }
+    //             ... on UsernameTaken {
+    //                 reason
+    //             }
+    //             ... on NamespaceOperationValidationFailed {
+    //                 reason
+    //             }
+    //             ... on TransactionWillFail {
+    //                 reason
+    //             }
+    //         }
+    //     }`;
+    
+    //     return sendGraphQLQuery(query);
+    // }
 
     if (step === "initial") {
         return (

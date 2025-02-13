@@ -192,7 +192,10 @@ export default function Account() {
         </>
         : null}
 
+        {isConnected?
         <Profile />
+        : <p className='m-4 text-xl font-semibold'>Connect your wallet to continue</p>
+        }
         {console.log('accdata->', accountsData)}
 
     </div>

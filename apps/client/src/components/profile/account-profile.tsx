@@ -40,7 +40,7 @@ export default function AccountProfile() {
                         {accountData.metadata?.picture ? (
                             <img 
                                 src={accountData.metadata.picture} 
-                                alt={accountData.metadata.name} 
+                                alt={accountData.metadata?.name || 'pic here'} 
                                 className="w-full h-full rounded-full object-cover"
                             />
                         ) : (
@@ -48,16 +48,16 @@ export default function AccountProfile() {
                         )}
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold">{accountData.metadata.name}</h1>
-                        <p className="text-gray-600">@{accountData.username.localName}</p>
+                        <h1 className="text-2xl font-bold">{accountData.metadata?.name}</h1>
+                        <p className="text-gray-600">@{accountData.username?.localName}</p>
                     </div>
                 </div>
 
                 {/* Bio */}
-                {accountData.metadata.bio && (
+                {accountData.metadata?.bio && (
                     <div className="border-t pt-4">
                         <h2 className="text-lg font-semibold mb-2">Bio</h2>
-                        <p className="text-gray-700">{accountData.metadata.bio}</p>
+                        <p className="text-gray-700">{accountData.metadata?.bio}</p>
                     </div>
                 )}
 
@@ -75,7 +75,7 @@ export default function AccountProfile() {
                         </p>
                         <p>
                             <span className="font-medium">Username:</span>{' '}
-                            {accountData.username.value}
+                            {accountData.username?.value}
                         </p>
                     </div>
                 </div>

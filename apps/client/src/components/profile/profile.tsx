@@ -2,7 +2,6 @@ import Accounts from './accounts'
 import { Button } from '@/components/ui/button'
 import { useCredentialStore } from '@/store/store'
 import { useState } from 'react'
-import { CreateAccount } from '../forms/create-account'
 import AccountProfile from './account-profile'
 import Posts from './posts'
 

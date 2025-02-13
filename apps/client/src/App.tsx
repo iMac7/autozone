@@ -13,8 +13,10 @@ import { Web3Provider } from './contexts/WagmiContext'
 import Navbar from './components/Navbar'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Layout from './components/sidebar/app-sidebar'
-import Accounts from './components/profile/accounts'
 import Dashboard from './routes/dashboard'
+import Group from './components/group/group'
+import Admin from './routes/admin'
+import Feed from './routes/feed'
 
 initializeDimoSDK({
   clientId: client_id,
@@ -40,6 +42,9 @@ function App() {
               <Route index element={<Home />} />
               <Route path='/account' element={<Account />} />
               <Route path='/dashboard' element={<Dashboard />} />
+              <Route path='/group/:id' element={<Group />} />
+              <Route path='/admin' element={<Admin />} />
+              <Route path='/feed/:address' element={<Feed />} />
             </Routes>
             </Layout>
           </Web3Provider>

@@ -1,4 +1,4 @@
-import { addAccountManager, createAccountWithUsername, enableSignless } from "@lens-protocol/client/actions";
+import { addAccountManager, createAccountWithUsername, createApp, enableSignless } from "@lens-protocol/client/actions";
 import { client } from "../client";
 import { storageClient } from "../storageclient";
 import { walletClient } from "../viem";
@@ -9,52 +9,65 @@ import { signMessage } from "@wagmi/core";
 import { config } from "@/contexts/WagmiContext";
 import { sendEip712Transaction } from "viem/zksync";
 import { sendGraphQLQuery } from "../query";
+import { app, Platform } from "@lens-protocol/metadata";
 
-// async function uploadAppMeta() {
-//     const metadata = {
-//         name: "autozone",
-//         tagline: "The zone to be",
-//         description: "An app to join the zone",
-//         logo: "",
-//         developer: "invincible007 invincible007@gmail.com",
-//         url: "https://example.com",
-//         termsOfService: "https://example.com/terms",
-//         privacyPolicy: "https://example.com/privacy",
-//         platforms: ["web"],
-//     }
+async function uploadAppMeta() {
+    const metadata = app({
+        name: "autozone",
+        tagline: "The zone to be",
+        description: "The car social app",
+        logo: "lens://adf9f84bd89932b1098bb44aca30afc7f7ee0269205e80fd40bb8f75032a8fd2",
+        developer: "invincible007 invincible007@gmail.com",
+        url: "https://example.com",
+        termsOfService: "https://example.com/terms",
+        privacyPolicy: "https://example.com/privacy",
+        platforms: [Platform.WEB],
+    })
 
-//     const { uri } = await storageClient.uploadAsJson(metadata)
-//     console.log('app meta uri=> ', uri)
+    const { uri } = await storageClient.uploadAsJson(metadata)
+    console.log('app meta uri=> ', uri)
+    return uri
 
-// }
+}
 
-// export async function authAsBuilder() {
-//     const authenticated = await client.login({
-//         builder: {
-//             address: signer.address,
-//         },
-//         signMessage: (message) => signer.signMessage({ message }),
-//     })
+export async function create_App() {
+    const meta_uri = await uploadAppMeta()
+    const sessionClient = await authAsBuilder(walletClient.account!.address)
 
-//     if (authenticated.isErr()) {
-//         return console.error(authenticated.error);
-//     }
+    const result = await createApp(sessionClient!, {
+        metadataUri: uri(meta_uri), // the URI from the previous step
+    }).andThen(handleWith(walletClient))
+    .andThen(sessionClient!.waitForTransaction);
+    console.log('create app result=>', result);
+    //example result
+    // {
+    //     "value": "0xe7fd241c955b0aa3b677c35fd94f4d90d315c4e30b9689be6af8ed8f39955e0f"
+    // }
 
-//     const sessionClient = authenticated.value;
-//     return sessionClient
+}
 
-// }
 
-// async function createMyApp() {
-//     const meta_uri = "lens://1a829cd29498b996aca1ff40c94433c147cd39ec1d7016c8787243623c1e26fc"
-//     const sessionClient = await authAsBuilder()
+export async function authAsBuilder(address: `0x${string}`) {
+    try {
+        const authenticated = await client.login({
+            builder: {
+                address,
+            },
+            signMessage: (message) => signMessage(config, { message }),
+        })
 
-//     const result = await createApp(sessionClient!, {
-//         metadataUri: uri(meta_uri), // the URI from the previous step
-//     }).andThen(handleWith(walletClient))
-//     console.log('create app result=>', result);
+        if (authenticated.isErr()) {
+            throw authenticated.error
+        }
 
-// }
+        const sessionClient = authenticated.value;
+        return sessionClient;
+    } catch (error) {
+        console.error('Failed to authenticate as builder:', error);
+        throw error
+    }
+}
+
 
 // export async function authenticate_with_challenge(user_address: `0x${string}`) {
 //     const challenge = await client.challenge({
@@ -189,7 +202,7 @@ export async function changeAuth(account_address: `0x${string}`) {
 
 export async function enable_Signless() {
     const sessionClient = await getSession()
-    const result:any = await enableSignless(sessionClient!)
+    const result: any = await enableSignless(sessionClient!)
 
     if (result.isErr()) {
         return console.error(result.error)
@@ -208,6 +221,13 @@ export async function enable_Signless() {
         value: BigInt(result.value.raw.value),
     })
     console.log('hash=>', hash);
+}
+
+export async function checkAuthStatus() {
+    const sessionClient = await getSession()
+    const result = await sessionClient!.getAuthenticatedUser()
+    console.log('auth status=', result)
+    return result
 }
 
 

@@ -23,8 +23,13 @@ export const postSchema = z.object({
 
 export type Post = z.infer<typeof postSchema>;
 
+interface PostFormProps {
+    closeForm: () => void;
+    refetchPosts: () => void;
+    feed?: string;
+}
 
-export function PostForm({ closeForm, refetchPosts }:any) {
+export function PostForm({ closeForm, refetchPosts, feed }: PostFormProps) {
     const [isPosting, setIsPosting] = useState(false)
 
     const { control, handleSubmit, formState: { errors }, setValue } = useForm({
@@ -47,19 +52,30 @@ export function PostForm({ closeForm, refetchPosts }:any) {
 
 
         const sessionClient = await getSession()
-        const result = await post(sessionClient!, {
-            contentUri: uri(_uri)
-        })
-            .andThen(handleWith(walletClient))
-            .andThen((sessionClient as any).waitForTransaction)
+
+        let result
+        if (feed) {
+            result = await post(sessionClient!, {
+                contentUri: uri(_uri),
+                feed: feed
+            })
+                .andThen(handleWith(walletClient))
+                .andThen((sessionClient as any).waitForTransaction)
+        } else {
+            result = await post(sessionClient!, {
+                contentUri: uri(_uri),
+            })
+                .andThen(handleWith(walletClient))
+                .andThen((sessionClient as any).waitForTransaction)
+        }
         console.log('posted=>', result);
         if (result.isOk()) {
             console.log("Transaction indexed:", result.value)
             setValue("content", "")
             refetchPosts()
-          } else {
+        } else {
             console.error("Transaction failed:", result.error)
-          }
+        }
         setIsPosting(false)
     }
 

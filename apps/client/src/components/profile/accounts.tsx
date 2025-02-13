@@ -21,6 +21,7 @@ export default function Accounts() {
 
     const { address: user_address, isConnected } = useAccount()
 
+    const lens_address = useCredentialStore(state => state.lens_address)
     const updateLensAddress = useCredentialStore(state => state.updateLensAddress)
 
     const { isLoading: accountsIsLoading, data: accounts, refetch: refetchAccounts } = useQuery({
@@ -52,10 +53,10 @@ export default function Accounts() {
 
             {
                 accountsIsLoading? null: accounts?.items.length ?
-                <div className="flex md:flex-wrap gap-4">
+                <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
                     {accounts.items.map((account, i) =>
                         <div key={i} className='p-4 max-w-[30rem]'>
-                            <Card>
+                            <Card className={`${lens_address === account.account.username.ownedBy ? 'border-2 border-green-500' : ''}`}>
                                 <CardHeader>
                                     <CardTitle>{account.account.username.localName}</CardTitle>
                                     <CardTitle className='text-sm'>{account.account.username.value.replace('lens/', '@')}</CardTitle>
@@ -67,8 +68,9 @@ export default function Accounts() {
                                 </CardContent>
                                 <CardFooter>
                                     <Button
+                                        disabled={lens_address === account.account.username.ownedBy}
                                         onClick={() => loginAsAccountOwner(account.account.username.ownedBy, user_address!, () => updateLensAddress(account.account.username.ownedBy))}
-                                    >Log in as account owner</Button>
+                                    >{lens_address === account.account.username.ownedBy ? 'Logged in' : 'Log in as account owner'}</Button>
                                 </CardFooter>
                             </Card>
 

@@ -1,19 +1,16 @@
-import { Calendar, Home, Inbox, Search, Settings, Contact, CarFrontIcon } from "lucide-react"
+import { Home, Contact, CarFrontIcon, AppWindow } from "lucide-react"
 
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-  useSidebar,
 } from "@/components/ui/sidebar"
-import { Button } from "../ui/button"
 import { Link } from "react-router"
 
 // Menu items.
@@ -32,6 +29,11 @@ const items = [
     title: "Dashboard",
     url: "dashboard",
     icon: CarFrontIcon,
+  },
+  {
+    title: "Admin",
+    url: "admin",
+    icon: AppWindow,
   },
 ]
 
@@ -76,6 +78,7 @@ function AppSidebar() {
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
       <SidebarProvider
+      defaultOpen={false}
       style={{
       }}
       >
