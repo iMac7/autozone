@@ -78,7 +78,7 @@ export default function Feeds() {
         }
     };
 
-    return <div className="h-full">
+    return <div className="h-full overflow-y-auto">
         {/* <Button onClick={fetch_Feeds}>Fetch Single Feed</Button>
         <Button onClick={checkAuthStatus}>Check Auth</Button>
         <Button onClick={() => loginAsAccountOwner(lens_address as `0x${string}`, walletClient.account!.address)}>Auth as owner</Button>
@@ -91,9 +91,9 @@ export default function Feeds() {
         {feedsError && <p>Error loading feeds. <Button onClick={() => refetchFeeds()}>Retry</Button></p>}        
 
         {feeds && (
-            <div className="my-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
                 {feeds.items.map((item) => (
-                    <div key={item.address} className="flex flex-col gap-2 p-4 border-2 rounded max-w-[20rem] cursor-pointer hover:bg-gray-200 bg-white"
+                    <div key={item.address} className="flex flex-col gap-2 p-4 border-2 rounded cursor-pointer hover:bg-gray-200 bg-white"
                         onClick={() => navigate(`/feed/${item.address}`)}
                     >
                         <p className="font-bold">{item.metadata?.name}</p>

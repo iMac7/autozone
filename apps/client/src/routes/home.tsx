@@ -2,32 +2,27 @@ import { fetchAppFeeds, fetchPosts } from '@lens-protocol/client/actions';
 import { client } from '../utils/client';
 import { evmAddress } from '@lens-protocol/client';
 import { Button } from '@/components/ui/button';
-// import { useAccount } from 'wagmi';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { useAppContext } from '@/contexts/AppContext';
-import PostsList from '@/components/post/posts-list';
 import { useQuery } from '@tanstack/react-query';
-import { PostForm } from '@/components/forms/create-post';
 import { useCredentialStore } from '@/store/store';
-import Timeline from '@/components/home/timeline';
-import Groups from '@/components/home/groups';
 import Feeds from '@/components/home/feeds';
 import { useAccount } from 'wagmi';
 import { app_address } from '@/utils/env';
+import Users from '@/components/home/users';
 
 
 export default function Home() {
   const [selectedSection, setSelectedSection] = useState(0)
-  const [shouldPost, setShouldPost] = useState(false)
 
   const { address: userAddress } = useAccount()
 
   const sections = [
     { name: 'Feeds', component: <Feeds /> },
+    { name: 'Users', component: <Users /> },
     // { name: 'Timeline', component: <Timeline /> },
     // {name: 'Posts', component: <PostsList shouldPost={shouldPost} setShouldPost={setShouldPost} />},
-    { name: 'Groups', component: <Groups /> },
+    // { name: 'Groups', component: <Groups /> },
   ]
 
   const navigate = useNavigate()
@@ -64,12 +59,13 @@ export default function Home() {
 
         <header className='p-2 flex justify-around border-b-2 border-black'>
           {sections.map((section, i) => (
-            <Button key={i} variant='ghost' className='font-semibold' onClick={() => setSelectedSection(i)}>{section.name}</Button>
+            <Button key={i} variant='ghost' className={`font-semibold border-b-2 ${selectedSection === i ? 'border-black' : 'border-transparent'}`} onClick={() => setSelectedSection(i)}>{section.name}</Button>
           ))}
         </header>
 
-        <div className="min-h-[85vh] border-2 border-gray-500 relative p-4 bg-[url('/images/cars.jpeg')] bg-cover bg-center bg-no-repeat">
-          {sections[selectedSection].component}
+        <div className="min-h-[85vh] border-2 border-gray-300 relative p-4 bg-white bg-cover bg-center bg-no-repeat">
+        {!userAddress? <p className='text-pink-500'>Please connect wallet first</p>
+          :sections[selectedSection].component}
         </div>
 
         {/* <Button 
@@ -80,18 +76,20 @@ export default function Home() {
 
         {/* {shouldPost && <PostForm closeForm={()=> setShouldPost(false)} refetchPosts={refetchPosts}  />} */}
       </div>
-      <div className="w-1/2 border-2 border-gray-500 p-6">
+      <div className="w-1/2 border-2 border-gray-300 p-6">
         <header className="p-4 border-b-2 border-gray-500 font-bold text-xl underline">Global feed</header>
         {appFeedsLoading && <p>Loading feeds...</p>}
-        {appFeedsError && <p>Error loading feeds. <Button onClick={() => refetchAppFeeds()}>Retry</Button></p>}
+        {appFeedsError && 
+        <p>Error loading feeds. <Button onClick={() => refetchAppFeeds()}>Retry</Button>
+        </p>}
         {appFeeds && (
           <div className="my-4">
             {appFeeds.items.map((item) => (
               <div key={item.feed} className="p-4 border-2 rounded max-w-[20rem] cursor-pointer hover:border-gray-500 bg-white"
                 onClick={() => navigate(`/feed/${item.feed}`)}
               >
-                <p>Name: {item.__typename}</p>
-                <p>Created: {new Date(item.timestamp).toLocaleDateString()}</p>
+                <p className='font-bold'>{item.__typename}</p>
+                <p className='text-sm'>Created {new Date(item.timestamp).toLocaleString()}</p>
               </div>
             ))}
           </div>

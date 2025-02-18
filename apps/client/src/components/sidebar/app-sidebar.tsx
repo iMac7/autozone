@@ -25,16 +25,16 @@ const items = [
     url: "account",
     icon: Contact,
   },
-  {
-    title: "Dashboard",
-    url: "dashboard",
-    icon: CarFrontIcon,
-  },
-  {
-    title: "Admin",
-    url: "admin",
-    icon: AppWindow,
-  },
+  // {
+  //   title: "Dashboard",
+  //   url: "dashboard",
+  //   icon: CarFrontIcon,
+  // },
+  // {
+  //   title: "Admin",
+  //   url: "admin",
+  //   icon: AppWindow,
+  // },
 ]
 
 function AppSidebar() {

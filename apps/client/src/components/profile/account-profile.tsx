@@ -1,16 +1,19 @@
 import { useCredentialStore } from "@/store/store";
 import { client } from "@/utils/client";
 import { evmAddress } from "@lens-protocol/client";
-import { fetchAccount } from "@lens-protocol/client/actions";
+import { fetchAccount, fetchAppUsers } from "@lens-protocol/client/actions";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { app_address } from "@/utils/env";
 
 export default function AccountProfile() {
     const lens_address = useCredentialStore(state => state.lens_address)
 
     const { data: accountData } = useQuery({
-        queryKey: ['getAccount'],
+        queryKey: ['getAccount', lens_address],
         queryFn: getAccount,
-        enabled: !!lens_address
+        enabled: !!lens_address,
+        staleTime: 1000 * 60 * 60 * 24
     })
 
     async function getAccount() {
@@ -27,6 +30,19 @@ export default function AccountProfile() {
 
     }
 
+    async function getAppUsers() {
+        const result = await fetchAppUsers(client, {
+            app: evmAddress(app_address),
+        });
+
+        if (result.isErr()) {
+            return console.error(result.error);
+        }
+
+        const appUsers = result.value
+        console.log('appUsers', appUsers)
+    }
+
     if (!accountData) {
         return <div className="p-4">Loading profile...</div>
     }
@@ -34,13 +50,13 @@ export default function AccountProfile() {
     return (
         <div className="w-[40rem] mx-auto p-6 bg-white rounded-lg shadow-md">
             <div className="space-y-6">
-                {/* Profile Header */}
+                <Button onClick={getAppUsers}>Get App Users</Button>
                 <div className="flex items-center space-x-4">
                     <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
                         {accountData.metadata?.picture ? (
-                            <img 
-                                src={accountData.metadata.picture} 
-                                alt={accountData.metadata?.name || 'pic here'} 
+                            <img
+                                src={accountData.metadata.picture}
+                                alt={accountData.metadata?.name || 'pic here'}
                                 className="w-full h-full rounded-full object-cover"
                             />
                         ) : (

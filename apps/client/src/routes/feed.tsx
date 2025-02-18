@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchFeed, fetchPosts } from "@lens-protocol/client/actions";
-import { evmAddress } from "@lens-protocol/client";
+import { evmAddress, PostType } from "@lens-protocol/client";
 import { client } from "@/utils/client";
 import PostsList from "@/components/post/posts-list";
 import { useState } from "react";
@@ -18,10 +18,11 @@ export default function Feed() {
         queryKey: ['feed_posts', address],
         queryFn: async () => {
             if (!address) throw new Error('Address is required');
-            
+
             const result = await fetchPosts(client, {
                 filter: {
-                    feeds: [{feed: evmAddress(address)}]
+                    feeds: [{ feed: evmAddress(address) }],
+                    postTypes: [PostType.Root, PostType.Repost, PostType.Quote]
                 }
             })
 
@@ -29,7 +30,7 @@ export default function Feed() {
             if (result.isErr()) {
                 throw result.error;
             }
-            
+
             return result.value;
         },
         enabled: !!address,
@@ -39,7 +40,7 @@ export default function Feed() {
         queryKey: ['feed', address],
         queryFn: async () => {
             if (!address) throw new Error('Address is required');
-            
+
             const result = await fetchFeed(client, {
                 feed: evmAddress(address)
             })
@@ -48,7 +49,7 @@ export default function Feed() {
             if (result.isErr()) {
                 throw result.error;
             }
-            
+
             return result.value;
         },
         enabled: !!address,
@@ -59,25 +60,28 @@ export default function Feed() {
     // if (!posts) return <div>No feed found</div>;
 
     return (
-        <div className="relative border-2 border-red-500 h-full overflow-y-auto">
-            {/* Replace with your feed display logic */}
-            {/* <pre>{JSON.stringify(feed, null, 2)}</pre> */}
-            {/* <p>feeds fetched</p> */}
-            {console.log('feedd->', feed)
-            }
-            <header className="p-4 border-b-2 border-gray-500 flex gap-4 items-center">
+        <>
+            <header className="sticky z-10 top-14 bg-white px-4 py-2 border-b-2 border-gray-500 flex gap-4 items-center">
                 <Button onClick={() => navigate(-1)}>Back</Button>
                 <div className="">
                     <h1 className="text-2xl font-bold">{feed?.metadata?.name}</h1>
                     <p className="text-sm">{feed?.metadata?.description}</p>
                 </div>
             </header>
-            {
-                postsIsLoading? <p>Loading...</p> :
-                postsError? <p>Error: {postsError.message}</p> :
-                !posts? <p>No feed found</p> :
-                <PostsList shouldPost={shouldPost} setShouldPost={setShouldPost} postsData={posts} refetchPosts={refetchPosts} feed={address} />
-            }
-        </div>
+            <div className="relative h-full overflow-y-auto">
+                {/* Replace with your feed display logic */}
+                {/* <pre>{JSON.stringify(feed, null, 2)}</pre> */}
+                {/* <p>feeds fetched</p> */}
+                {console.log('feedd->', feed)
+                }
+
+                {
+                    postsIsLoading ? <p>Loading...</p> :
+                        postsError ? <p>Error: {postsError.message}</p> :
+                            !posts ? <p>No feed found</p> :
+                                <PostsList shouldPost={shouldPost} setShouldPost={setShouldPost} postsData={posts} refetchPosts={refetchPosts} feed={address} />
+                }
+            </div>
+        </>
     );
 }
