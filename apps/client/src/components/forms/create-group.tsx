@@ -48,6 +48,7 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
         name: values.name,
         description: values.description,
         icon: values.icon,
+        
       });
 
       // 2. Upload metadata

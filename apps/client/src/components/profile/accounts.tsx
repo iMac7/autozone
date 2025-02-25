@@ -25,7 +25,7 @@ export default function Accounts() {
     const updateLensAddress = useCredentialStore(state => state.updateLensAddress)
 
     const { isLoading: accountsIsLoading, data: accounts, refetch: refetchAccounts } = useQuery({
-        queryKey: ['getAccounts'],
+        queryKey: ['getAccounts', user_address],
         queryFn: getAccounts,
         enabled: isConnected
     })
@@ -39,38 +39,36 @@ export default function Accounts() {
     }
 
     return (
-        <div className="p-4 bg-white relative z-20">
-            {console.log('acc->', accounts)
-            }
+        <div className="p-4 bg-white relative z-20 max-w-[20rem] md:max-w-full overflow-hidden">
 
             {!createAccount ?
             <>
             {accountsIsLoading ?
                 <p className='text-xl font-semibold'>fetching accounts...</p>
                 : accounts?.items.length ?
-                    <h3 className='ml-4 text-xl font-semibold'>Accounts owned by this wallet address</h3>
+                    <h3 className='sm:ml-4 text-xl font-semibold'>Accounts owned by this wallet address</h3>
                     : null}
 
             {
                 accountsIsLoading? null: accounts?.items.length ?
                 <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
                     {accounts.items.map((account, i) =>
-                        <div key={i} className='p-4 max-w-[30rem]'>
-                            <Card className={`${lens_address === account.account.username.ownedBy ? 'border-2 border-green-500' : ''}`}>
+                        <div key={i} className='p-2 max-w-[30rem]'>
+                            <Card className={`${lens_address && lens_address === account.account.address ? 'border-2 border-green-500' : ''}`}>
                                 <CardHeader>
-                                    <CardTitle>{account.account.username.localName}</CardTitle>
-                                    <CardTitle className='text-sm'>{account.account.username.value.replace('lens/', '@')}</CardTitle>
+                                    <CardTitle>{account.account.metadata.name}</CardTitle>
+                                    <CardTitle className='text-sm'>{account.account.username?.value?.replace('lens/', '@')}</CardTitle>
                                     <CardDescription>Created on {new Date(account.account.createdAt).toDateString()}</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <p>Lens account address</p>
-                                    <p className='text-sm'>{account.account.username.ownedBy}</p>
+                                    <p className='text-xs'>Lens account address</p>
+                                    <p className='text-sm w-[5rem]'>{account.account.address}</p>
                                 </CardContent>
                                 <CardFooter>
                                     <Button
-                                        disabled={lens_address === account.account.username.ownedBy}
-                                        onClick={() => loginAsAccountOwner(account.account.username.ownedBy, user_address!, () => updateLensAddress(account.account.username.ownedBy))}
-                                    >{lens_address === account.account.username.ownedBy ? 'Logged in' : 'Log in as account owner'}</Button>
+                                        disabled={lens_address === account.account.owner}
+                                        onClick={() => loginAsAccountOwner(account.account.address, user_address!, () => updateLensAddress(account.account.address))}
+                                    >{lens_address === account.account.owner ? 'Logged in' : 'Log in as account owner'}</Button>
                                 </CardFooter>
                             </Card>
 
@@ -86,7 +84,7 @@ export default function Accounts() {
                 onClick={() => setCreateAccount(true)}
             >Create Account</Button>
             </>
-            : <CreateAccount setCreateAccount={setCreateAccount} />}
+            : <CreateAccount setCreateAccount={setCreateAccount} refetchAccounts={refetchAccounts} />}
         </div>
     )
 }

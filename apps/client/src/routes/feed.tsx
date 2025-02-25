@@ -45,7 +45,6 @@ export default function Feed() {
                 feed: evmAddress(address)
             })
 
-            console.log('valuee->', result);
             if (result.isErr()) {
                 throw result.error;
             }
@@ -55,25 +54,16 @@ export default function Feed() {
         enabled: !!address,
     });
 
-    // if (postsIsLoading) return <div>Loading...</div>;
-    // if (postsError) return <div>Error: {postsError.message}</div>;
-    // if (!posts) return <div>No feed found</div>;
-
     return (
         <>
-            <header className="sticky z-10 top-14 bg-white px-4 py-2 border-b-2 border-gray-500 flex gap-4 items-center">
+            <header className=" bg-slate-200 sticky z-10 top-14 px-4 py-2 border-t-[1px] border-b-[1px] border-gray-500 flex gap-4 items-center">
                 <Button onClick={() => navigate(-1)}>Back</Button>
                 <div className="">
-                    <h1 className="text-2xl font-bold">{feed?.metadata?.name}</h1>
-                    <p className="text-sm">{feed?.metadata?.description}</p>
+                    <h2 className="text-2xl font-bold">{feed?.metadata?.name}</h2>
+                    <p className="text-sm">{feedIsLoading ? 'loading ...' : feed?.metadata?.description}</p>
                 </div>
             </header>
             <div className="relative h-full overflow-y-auto">
-                {/* Replace with your feed display logic */}
-                {/* <pre>{JSON.stringify(feed, null, 2)}</pre> */}
-                {/* <p>feeds fetched</p> */}
-                {console.log('feedd->', feed)
-                }
 
                 {
                     postsIsLoading ? <p>Loading...</p> :

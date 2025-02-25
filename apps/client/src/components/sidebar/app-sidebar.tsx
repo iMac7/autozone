@@ -10,10 +10,12 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { Link } from "react-router"
+import { Button } from "@/components/ui/button"
+import SideContent from "../sidecontent"
 
-// Menu items.
 const items = [
   {
     title: "Home",
@@ -38,17 +40,29 @@ const items = [
 ]
 
 function AppSidebar() {
-        // const {
-        //   state,
-        //   open,
-        //   setOpen,
-        //   openMobile,
-        //   setOpenMobile,
-        //   isMobile,
-        //   toggleSidebar,
-        // } = useSidebar()
+  const {
+    state,
+    open,
+    setOpen,
+    openMobile,
+    setOpenMobile,
+    isMobile,
+    toggleSidebar,
+  } = useSidebar()
 
-
+  if(isMobile) {
+    return (
+      <div className="fixed z-30 bottom-0 flex justify-around w-screen border-t-[1px] border-black bg-slate-300 p-2">
+        {
+          items.map((item, i) => 
+            <Link to={item.url} key={i}>
+              <Button>{item.title}</Button>
+            </Link>
+          )
+        }
+      </div>
+    )
+  }
 
   return (
     <Sidebar side="left" variant="sidebar" collapsible="icon">
@@ -76,16 +90,19 @@ function AppSidebar() {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-    return (
-      <SidebarProvider
+  return (
+    <SidebarProvider
       defaultOpen={false}
       style={{
       }}
-      >
-        <AppSidebar />
-        <main className="w-full mt-14">
-          {children}
-        </main>
-      </SidebarProvider>
-    )
-  }
+    >
+      <AppSidebar />
+      <main className="w-full md:w-1/2 mt-14">
+        {children}
+      </main>
+      <aside className="hidden md:block mt-14 w-1/2">
+      <SideContent />
+      </aside>
+    </SidebarProvider>
+  )
+}

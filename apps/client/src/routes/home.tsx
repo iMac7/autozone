@@ -1,15 +1,11 @@
-import { fetchAppFeeds, fetchPosts } from '@lens-protocol/client/actions';
-import { client } from '../utils/client';
-import { evmAddress } from '@lens-protocol/client';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
 import { useCredentialStore } from '@/store/store';
 import Feeds from '@/components/home/feeds';
 import { useAccount } from 'wagmi';
-import { app_address } from '@/utils/env';
 import Users from '@/components/home/users';
+// import Groups from '@/components/home/groups';
 
 
 export default function Home() {
@@ -18,7 +14,7 @@ export default function Home() {
   const { address: userAddress } = useAccount()
 
   const sections = [
-    { name: 'Feeds', component: <Feeds /> },
+    { name: 'Chat', component: <Feeds /> },
     { name: 'Users', component: <Users /> },
     // { name: 'Timeline', component: <Timeline /> },
     // {name: 'Posts', component: <PostsList shouldPost={shouldPost} setShouldPost={setShouldPost} />},
@@ -35,27 +31,13 @@ export default function Home() {
     }
   }, [])
 
-  const { data: appFeeds, isLoading: appFeedsLoading, error: appFeedsError, refetch: refetchAppFeeds } = useQuery({
-    queryKey: ['app_feeds'],
-    queryFn: async () => {
-      const result = await fetchAppFeeds(client, {
-        app: evmAddress(app_address),
-      });
 
-      if (result.isErr()) {
-        throw result.error;
-      }
-      console.log('feeds resultt->', result.value);
-
-      return result.value;
-    }
-  })
 
 
 
   return (
     <div className='flex w-full gap-4'>
-      <div className='flex flex-col gap-2 w-1/2'>
+      <div className='flex flex-col gap-2 w-full'>
 
         <header className='p-2 flex justify-around border-b-2 border-black'>
           {sections.map((section, i) => (
@@ -75,37 +57,6 @@ export default function Home() {
       </Button> */}
 
         {/* {shouldPost && <PostForm closeForm={()=> setShouldPost(false)} refetchPosts={refetchPosts}  />} */}
-      </div>
-      <div className="w-1/2 border-2 border-gray-300 p-6">
-        <header className="p-4 border-b-2 border-gray-500 font-bold text-xl underline">Global feed</header>
-        {appFeedsLoading && <p>Loading feeds...</p>}
-        {appFeedsError && 
-        <p>Error loading feeds. <Button onClick={() => refetchAppFeeds()}>Retry</Button>
-        </p>}
-        {appFeeds && (
-          <div className="my-4">
-            {appFeeds.items.map((item) => (
-              <div key={item.feed} className="p-4 border-2 rounded max-w-[20rem] cursor-pointer hover:border-gray-500 bg-white"
-                onClick={() => navigate(`/feed/${item.feed}`)}
-              >
-                <p className='font-bold'>{item.__typename}</p>
-                <p className='text-sm'>Created {new Date(item.timestamp).toLocaleString()}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* //leaderboard */}
-        <div className="my-4">
-          <header className="p-4 border-b-2 border-gray-500 font-bold text-xl underline">Leaderboard</header>
-          <div className="mt-4 p-4 border-2 rounded max-w-[20rem] cursor-pointer hover:border-gray-500 bg-white">
-            <p>1. Ferrari 488</p>
-            <p>2. Porsche 911</p>
-            <p>3. Lamborghini Aventador</p>
-          </div>
-        </div>
-
-
       </div>
     </div>
   )

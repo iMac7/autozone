@@ -32,7 +32,7 @@ export default function Posts() {
       }
     
     return (
-        <div className="min-h-[80vh] bg-gray-200">
+        <div className="min-h-[80vh] w-full flex justify-center bg-gray-200">
             {postsIsLoading ? (
                 <div className="flex justify-center items-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />

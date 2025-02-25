@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { account, MetadataAttributeType } from "@lens-protocol/metadata";
-import { useWalletClient } from "wagmi";
+import { account } from "@lens-protocol/metadata";
 import { client } from "@/utils/client";
 import { storageClient } from "@/utils/storageclient";
 import { createAccountWithUsername } from "@lens-protocol/client/actions";
@@ -27,7 +26,8 @@ import { config } from "@/contexts/WagmiContext";
 
 const accountFormSchema = z.object({
     name: z.string().min(1, "Name is required"),
-    bio: z.string(),
+    localName: z.string().min(1, "Local name is required"),
+    bio: z.string().min(1, "Bio is required"),
     picture: z.string().optional(),
     coverPicture: z.string().optional(),
     twitter: z.string().optional(),
@@ -35,16 +35,17 @@ const accountFormSchema = z.object({
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: boolean) => void }) {
+export function CreateAccount({ setCreateAccount, refetchAccounts }: { setCreateAccount: (value: boolean) => void, refetchAccounts: ()=> void }) {
     const [step, setStep] = useState<
-        "initial" | "metadata" | "uploading" | "deploying" | "success"
-    >("initial");
+        "metadata" | "uploading" | "deploying" | "success"
+    >("metadata");
     const [error, setError] = useState<string | null>(null);
 
     const form = useForm<AccountFormValues>({
         resolver: zodResolver(accountFormSchema),
         defaultValues: {
             name: "",
+            localName: "",
             bio: "",
             picture: "",
             coverPicture: "",
@@ -52,13 +53,14 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
         },
     });
 
-    const onSubmit = async (data: AccountFormValues) => {
+    const onSubmit = async (data: AccountFormValues) => {                
+
         try {
-            // Step 1: Login as onboarding user
+            // Login as onboarding user
             const authenticated = await client.login({
                 onboardingUser: {
                     app: app_address,
-                    wallet: walletClient?.account.address as string,
+                    wallet: walletClient?.account!.address as string,
                 },
                 signMessage: (message) => signMessage(config, { message }),
             });
@@ -69,28 +71,24 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
 
             const sessionClient = authenticated.value;
 
-            // Step 2: Create and upload metadata
-            // setStep("uploading");
-            // const metadata = account({
-            //     name: data.name,
-            //     bio: data.bio,
-            //     // picture: data.picture || undefined,
-            //     // coverPicture: data.coverPicture || undefined,
-            // });
+            const metadata = account({
+                name: data.name,
+                bio: data.bio,
+            })
 
             // // Store metadata in localStorage for recovery
             // localStorage.setItem("lens_account_metadata", JSON.stringify(metadata));
 
-            // const { uri } = await storageClient.uploadAsJson(metadata);
-            // localStorage.setItem("lens_account_uri", uri);
+            const { uri } = await storageClient.uploadAsJson(metadata);
+            localStorage.setItem("lens_account_uri", uri);
 
             // const uri = "lens://3623ccbb4d061f4454ecdd22c3dc2224f2bf67f0e0df84c198ee71762f3c2455"
-            const uri = 'lens://624084ae4d89c3172e9a2cd335194790b017842a8194e366e2b1bc3281ee4f45'
+            // const uri = 'lens://624084ae4d89c3172e9a2cd335194790b017842a8194e366e2b1bc3281ee4f45'
 
             // Step 3: Deploy account contract
             setStep("deploying");
             const result = await createAccountWithUsername(sessionClient, {
-                username: { localName: "carguyy1"},
+                username: { localName: data.localName },
                 metadataUri: uri,
             }).andThen(handleWith(walletClient));
 
@@ -98,29 +96,32 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
                 throw new Error(result.error.message);
             }
 
-            // Step 4: Query account details and switch to account owner
-            const accountQuery =
-                `
-          query GetAccount($txHash: ${result.value.txHash}) {
-            account(request: { txHash: $txHash }) {
-              address
-            }
-          }
-        `
-            // variables: { txHash: result.value.txHash },
-            const accountQueryResult = await sendGraphQLQuery(accountQuery)
-            console.log('accountQueryResult=>', accountQueryResult)
+            // Query account details and switch to account owner
+            // const accountQuery =
+            //     `
+            //     query GetAccount($txHash: ${result.value.txHash}) {
+            //         account(request: { txHash: $txHash }) {
+            //         address
+            //         }
+            //     }
+            //     `
+            // // variables: { txHash: result.value.txHash },
+            // const accountQueryResult = await sendGraphQLQuery(accountQuery)
+            // console.log('accountQueryResult=>', accountQueryResult)
 
-            if (accountQueryResult.data.errors.length) {
-                throw new Error(accountQueryResult.data.errors[0].message)
-            }
+            // if (accountQueryResult.data.errors.length) {
+            //     throw new Error(accountQueryResult.data.errors[0].message)
+            // }
 
             // const accountAddress = accountQueryResult.data.account.address
             // await changeAuth(accountAddress)
 
 
-
-            //   setStep("success");
+            setStep("success");
+            setTimeout(() => {
+                setCreateAccount(false)
+                refetchAccounts()
+            }, 1000);
 
             // Clear localStorage after successful creation
             //   localStorage.removeItem("lens_account_metadata");
@@ -132,69 +133,17 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
         }
     };
 
-    // async function create_account_with_username(
-    //     localName: string,
-    //     metadataUri: string,
-    //     accountManager: string[]
-    // ) {
-    //     const query = `
-    //     mutation {
-    //         createAccountWithUsername(
-    //             request: {
-    //                 username: {
-    //                     localName: "${localName}"
-    //                 }
-    //                 metadataUri: "${metadataUri}"
-    //                 accountManager: ${JSON.stringify(accountManager)}
-    //             }
-    //         ) {
-    //             ... on CreateAccountResponse {
-    //                 hash
-    //             }
-    //             ... on SponsoredTransactionRequest {
-    //                 id
-    //                 request
-    //             }
-    //             ... on SelfFundedTransactionRequest {
-    //                 request
-    //             }
-    //             ... on UsernameTaken {
-    //                 reason
-    //             }
-    //             ... on NamespaceOperationValidationFailed {
-    //                 reason
-    //             }
-    //             ... on TransactionWillFail {
-    //                 reason
-    //             }
-    //         }
-    //     }`;
-    
-    //     return sendGraphQLQuery(query);
-    // }
-
-    if (step === "initial") {
-        return (
-            <div className="w-full">
-                <Button
-                    className="w-full"
-                    onClick={() => setStep("metadata")}
-                >
-                    Log in as Onboarding User
-                </Button>
-            </div>
-        );
-    }
 
     return (
-        <div className="w-[30rem] p-6 max-w-[30rem] border-2 border-gray-300 relative rounded-lg">
+        <div className="w-full p-6 max-w-[30rem] border-2 border-gray-300 relative rounded-lg">
 
-            <p className="text-2xl font-bold mb-6 underline">Create Account</p>
+            <p className="text-2xl font-bold underline">Create Account</p>
+            <p className="my-4 text-xs">Please refresh in case of errors creating account.</p>
             <Button
                 className="absolute top-2 right-2"
                 onClick={() => setCreateAccount(false)}
             >
-                Back
+                X
             </Button>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -203,7 +152,21 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>Username</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="localName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Local name (can be same as username)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -226,7 +189,7 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
                         )}
                     />
 
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="picture"
                         render={({ field }) => (
@@ -266,7 +229,7 @@ export function CreateAccount({ setCreateAccount }: { setCreateAccount: (value: 
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    /> */}
 
                     {error && (
                         <div className="text-red-500 text-sm">{error}</div>
