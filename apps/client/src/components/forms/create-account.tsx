@@ -18,7 +18,6 @@ import { client } from "@/utils/client";
 import { storageClient } from "@/utils/storageclient";
 import { createAccountWithUsername } from "@lens-protocol/client/actions";
 import { handleWith } from "@lens-protocol/client/viem";
-import { sendGraphQLQuery } from "@/utils/query";
 import { walletClient } from "@/utils/viem";
 import { app_address } from "@/utils/env";
 import { signMessage } from "@wagmi/core";
@@ -90,7 +89,7 @@ export function CreateAccount({ setCreateAccount, refetchAccounts }: { setCreate
             const result = await createAccountWithUsername(sessionClient, {
                 username: { localName: data.localName },
                 metadataUri: uri,
-            }).andThen(handleWith(walletClient));
+            }).andThen(handleWith(walletClient as any));
 
             if (result.isErr()) {
                 throw new Error(result.error.message);
@@ -127,7 +126,7 @@ export function CreateAccount({ setCreateAccount, refetchAccounts }: { setCreate
             //   localStorage.removeItem("lens_account_metadata");
             //   localStorage.removeItem("lens_account_uri");
 
-        } catch (err) {
+        } catch (err: any) {
             setError(err.message);
             setStep("metadata");
         }

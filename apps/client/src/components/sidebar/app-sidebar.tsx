@@ -1,4 +1,4 @@
-import { Home, Contact, CarFrontIcon, AppWindow } from "lucide-react"
+import { Home, CarFrontIcon } from "lucide-react"
 
 import {
   Sidebar,
@@ -25,7 +25,7 @@ const items = [
   {
     title: "Account",
     url: "account",
-    icon: Contact,
+    icon: CarFrontIcon,
   },
   // {
   //   title: "Dashboard",
@@ -41,13 +41,7 @@ const items = [
 
 function AppSidebar() {
   const {
-    state,
-    open,
-    setOpen,
-    openMobile,
-    setOpenMobile,
     isMobile,
-    toggleSidebar,
   } = useSidebar()
 
   if(isMobile) {

@@ -7,7 +7,7 @@ import { handleWith } from "@lens-protocol/client/viem";
 import { uri } from '@lens-protocol/client';
 
 import { storageClient } from '@/utils/storageclient';
-import { authAsBuilder, getSession, loginAsAccountOwner } from '@/utils/auth/auth';
+import { authAsBuilder, loginAsAccountOwner } from '@/utils/auth/auth';
 import { walletClient } from '@/utils/viem';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,16 +67,15 @@ export function CreateFeedForm({ onSuccess }: CreateGroupFormProps) {
             const result = await createFeed(sessionClient!, {
                 metadataUri: uri(metadataUri),
             })
-                .andThen(handleWith(walletClient))
+                .andThen(handleWith(walletClient as any))
                 .andThen(sessionClient!.waitForTransaction);
 
             if (result.isOk()) {
                 console.log('create feed result->', result.value);
-                // ex result: 0xcd44d6fa0b8f4c5186b947f0df852de651a0443872abea6fcc06fb22f424bcd7
                 form.reset();
                 //authenticate as account owner again
-                const sessionClient = await loginAsAccountOwner(lens_address as `0x${string}`, walletClient.account!.address)
-                onSuccess?.(result.value);
+                await loginAsAccountOwner(lens_address as `0x${string}`, walletClient.account!.address)
+                onSuccess?.();
             } else {
                 form.setError("root", {
                     message: result.error.message || 'Failed to create group'

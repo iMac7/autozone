@@ -18,7 +18,7 @@ import { walletClient } from '@/utils/viem';
 
 
 export const postSchema = z.object({
-    content: z.string().min(1, 'Name is required'),
+    content: z.string().min(1, 'Please post something :)'),
 });
 
 export type Post = z.infer<typeof postSchema>;
@@ -31,6 +31,7 @@ interface PostFormProps {
 
 export function PostForm({ closeForm, refetchPosts, feed }: PostFormProps) {
     const [isPosting, setIsPosting] = useState(false)
+    const [postError, setPostError] = useState<string | null>(null)
 
     const { control, handleSubmit, formState: { errors }, setValue } = useForm({
         resolver: zodResolver(postSchema),
@@ -44,43 +45,56 @@ export function PostForm({ closeForm, refetchPosts, feed }: PostFormProps) {
     const onSubmit = (data: any) => createPost(data)
 
     async function createPost(data: any) {
-        setIsPosting(true)
-        const metadata = textOnly(data)
+        try {
+            setIsPosting(true)
+            const metadata = textOnly(data)
 
-        const { uri: _uri } = await storageClient.uploadAsJson(metadata)
-        console.log("posted uri-> ", _uri);
+            const { uri: _uri } = await storageClient.uploadAsJson(metadata)
+            console.log("posted uri-> ", _uri);
 
 
-        const sessionClient = await getSession()
+            const sessionClient = await getSession()
 
-        let result
-        if (feed) {
-            result = await post(sessionClient!, {
-                contentUri: uri(_uri),
-                feed: feed
-            })
-                .andThen(handleWith(walletClient))
-                .andThen((sessionClient as any).waitForTransaction)
-        } else {
-            result = await post(sessionClient!, {
-                contentUri: uri(_uri),
-            })
-                .andThen(handleWith(walletClient))
-                .andThen((sessionClient as any).waitForTransaction)
+            let result
+            if (feed) {
+                result = await post(sessionClient!, {
+                    contentUri: uri(_uri),
+                    feed: feed
+                })
+                    .andThen(handleWith(walletClient as any))
+                    .andThen((sessionClient as any).waitForTransaction)
+            } else {
+                result = await post(sessionClient!, {
+                    contentUri: uri(_uri),
+                })
+                    .andThen(handleWith(walletClient as any))
+                    .andThen((sessionClient as any).waitForTransaction)
+            }
+            console.log('posted=>', result);
+            if (result.isOk()) {
+                console.log("Transaction indexed:", result.value)
+                setValue("content", "")
+                refetchPosts()
+            } else {
+                console.error("Transaction failed:", result.error)
+            }
+
+        } catch (error) {
+            setPostError("Could not post. Please try again later.")
+            setIsPosting(false)
+            setTimeout(() => {
+                setPostError(null)
+            }, 5000)
+
         }
-        console.log('posted=>', result);
-        if (result.isOk()) {
-            console.log("Transaction indexed:", result.value)
-            setValue("content", "")
-            refetchPosts()
-        } else {
-            console.error("Transaction failed:", result.error)
+        finally {
+            setIsPosting(false)
+
         }
-        setIsPosting(false)
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white space-y-4 p-6 pt-10 w-full max-w-[30rem] min-w-[10rem] border border-gray-500 fixed bottom-0 z-10">
+        <form onSubmit={handleSubmit(onSubmit)} className="bg-white space-y-4 p-6 pt-10 w-full max-w-[30rem] min-w-[10rem] border border-gray-500 fixed bottom-12 md:bottom-0 z-10">
             <Button className='absolute top-2 right-2 rounded-2xl' onClick={closeForm}>X</Button>
 
             <Controller
@@ -88,8 +102,8 @@ export function PostForm({ closeForm, refetchPosts, feed }: PostFormProps) {
                 control={control}
                 render={({ field }) => <Input {...field} placeholder="how are you feeling today?" />}
             />
-            {errors.content && <p>{errors.content.message}</p>}
-
+            {errors.content && <p className='text-sm text-pink-300'>{errors.content.message}</p>}
+            {postError && <p className='text-sm text-pink-300'>{postError}</p>}
             <Button type="submit" disabled={isPosting}>Post</Button>
         </form>
     );

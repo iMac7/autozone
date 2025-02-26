@@ -4,7 +4,6 @@ import { client } from "@/utils/client";
 import { app_address } from "@/utils/env";
 import { evmAddress } from "@lens-protocol/client";
 import { fetchAccount, fetchAppUsers } from "@lens-protocol/client/actions";
-import { Button } from "../ui/button";
 
 export default function Users() {
 

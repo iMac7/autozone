@@ -30,8 +30,6 @@ export default function Group() {
         <div className="">
             <h1>{group?.metadata?.name || 'Unnamed Group'}</h1>
             <p>Address: {id}</p>
-            {console.log('group->', group)
-            }
         </div>
     )
 }

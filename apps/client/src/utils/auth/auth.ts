@@ -1,4 +1,4 @@
-import { addAccountManager, createAccountWithUsername, createApp, enableSignless } from "@lens-protocol/client/actions";
+import { addAccountManager, createAccountWithUsername, enableSignless } from "@lens-protocol/client/actions";
 import { client } from "../client";
 import { storageClient } from "../storageclient";
 import { walletClient } from "../viem";
@@ -9,42 +9,42 @@ import { signMessage } from "@wagmi/core";
 import { config } from "@/contexts/WagmiContext";
 import { sendEip712Transaction } from "viem/zksync";
 import { sendGraphQLQuery } from "../query";
-import { app, Platform } from "@lens-protocol/metadata";
+// import { app, Platform } from "@lens-protocol/metadata";
 
-async function uploadAppMeta() {
-    const metadata = app({
-        name: "autozone",
-        tagline: "The zone to be",
-        description: "The car social app",
-        logo: "lens://adf9f84bd89932b1098bb44aca30afc7f7ee0269205e80fd40bb8f75032a8fd2",
-        developer: "invincible007 invincible007@gmail.com",
-        url: "https://example.com",
-        termsOfService: "https://example.com/terms",
-        privacyPolicy: "https://example.com/privacy",
-        platforms: [Platform.WEB],
-    })
+// async function uploadAppMeta() {
+//     const metadata = app({
+//         name: "autozone",
+//         tagline: "The zone to be",
+//         description: "The car social app",
+//         logo: "lens://adf9f84bd89932b1098bb44aca30afc7f7ee0269205e80fd40bb8f75032a8fd2",
+//         developer: "invincible007 invincible007@gmail.com",
+//         url: "https://example.com",
+//         termsOfService: "https://example.com/terms",
+//         privacyPolicy: "https://example.com/privacy",
+//         platforms: [Platform.WEB],
+//     })
 
-    const { uri } = await storageClient.uploadAsJson(metadata)
-    console.log('app meta uri=> ', uri)
-    return uri
+//     const { uri } = await storageClient.uploadAsJson(metadata)
+//     console.log('app meta uri=> ', uri)
+//     return uri
 
-}
+// }
 
-export async function create_App() {
-    const meta_uri = await uploadAppMeta()
-    const sessionClient = await authAsBuilder(walletClient.account!.address)
+// export async function create_App() {
+//     const meta_uri = await uploadAppMeta()
+//     const sessionClient = await authAsBuilder(walletClient.account!.address)
 
-    const result = await createApp(sessionClient!, {
-        metadataUri: uri(meta_uri), // the URI from the previous step
-    }).andThen(handleWith(walletClient))
-    .andThen(sessionClient!.waitForTransaction);
-    console.log('create app result=>', result);
-    //example result
-    // {
-    //     "value": "0xe7fd241c955b0aa3b677c35fd94f4d90d315c4e30b9689be6af8ed8f39955e0f"
-    // }
+//     const result = await createApp(sessionClient!, {
+//         metadataUri: uri(meta_uri), // the URI from the previous step
+//     }).andThen(handleWith(walletClient))
+//     .andThen(sessionClient!.waitForTransaction);
+//     console.log('create app result=>', result);
+//     //example result
+//     // {
+//     //     "value": "0xe7fd241c955b0aa3b677c35fd94f4d90d315c4e30b9689be6af8ed8f39955e0f"
+//     // }
 
-}
+// }
 
 
 export async function authAsBuilder(address: `0x${string}`) {
@@ -118,7 +118,7 @@ export async function createAccount(address: `0x${string}`, metadata: any, local
         username: { localName },
         metadataUri: uri(_uri),
     })
-        .andThen(handleWith(walletClient))
+        .andThen(handleWith(walletClient as any))
     return result
 }
 
@@ -219,7 +219,7 @@ export async function enable_Signless() {
             result.value.raw.customData.paymasterParams?.paymasterInput,
         to: result.value.raw.to,
         value: BigInt(result.value.raw.value),
-    })
+    } as any)
     console.log('hash=>', hash);
 }
 

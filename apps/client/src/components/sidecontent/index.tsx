@@ -65,7 +65,7 @@ export default function SideContent() {
         </div>
       )}
 
-      <Table className='bg-slate-100 max-w-full mt-20'>
+      <Table className='bg-slate-100 max-w-[25rem] mt-10'>
         <TableCaption>Safety first !</TableCaption>
         <TableHeader className='bg-gray-300'>
           <TableRow className=''>

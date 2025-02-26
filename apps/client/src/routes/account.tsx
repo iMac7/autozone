@@ -1,4 +1,4 @@
-import { fetchAccount, fetchAccountsAvailable } from '@lens-protocol/client/actions';
+import { fetchAccountsAvailable } from '@lens-protocol/client/actions';
 import { useEffect, useState } from 'react'
 import { client } from '../utils/client';
 import { evmAddress } from '@lens-protocol/client';
@@ -6,7 +6,6 @@ import {
   LoginWithDimo,
   useDimoAuthState,
 } from "@dimo-network/login-with-dimo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button';
 import { useAccount } from 'wagmi';
 import ProfileForm from '@/components/forms/profile-form';
@@ -14,8 +13,6 @@ import { loginAsAccountOwner } from '@/utils/auth/auth';
 import { useQuery } from '@tanstack/react-query';
 import { useAppContext } from '@/contexts/AppContext';
 import Profile from '@/components/profile/profile';
-import { useCredentialStore } from '@/store/store';
-
 
 
 export default function Account() {
@@ -24,8 +21,6 @@ export default function Account() {
   const { loggedInAccount } = useAppContext()
 
   const { address: user_address, isConnected } = useAccount()
-
-  const myadd = useCredentialStore(state => state.user_address)
 
   useEffect(() => {
     const loggedIn = localStorage.getItem('lens_account')
@@ -49,32 +44,12 @@ export default function Account() {
     enabled: isConnected
   })
 
-  const { data: accountData } = useQuery({
-    queryKey: ['getAccount'],
-    queryFn: getAccount,
-    enabled: isConnected
-  })
-
   async function getAccounts() {
     const result = await fetchAccountsAvailable(client, {
       managedBy: evmAddress(user_address!),
       includeOwned: true,
     })
     return (result as any).value
-  }
-
-  async function getAccount() {
-    const result = await fetchAccount(client, {
-      address: evmAddress(user_address!),
-    })
-
-    if (result.isErr()) {
-      return console.error(result.error);
-    }
-
-    const account = result.value
-    return account
-
   }
 
 
@@ -84,7 +59,6 @@ export default function Account() {
 
   return (
     <div className=''>
-      {console.log('myadd=> ', myadd)}
       <div className="w-full p-4 flex justify-center items-center bg-black">
         <LoginWithDimo
           mode='popup'
@@ -196,8 +170,6 @@ export default function Account() {
         <Profile />
         : <p className='m-4 text-xl font-semibold'>Connect your wallet to continue</p>
         }
-        {console.log('accdata->', accountsData)}
-
     </div>
   )
 }

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CreateGroupForm } from "../forms/create-group";
 import { fetchGroups } from "@lens-protocol/client/actions";
-import { useAccount } from 'wagmi';
 import { client } from '@/utils/client';
 import { Button } from '@/components/ui/button';
 import { useCredentialStore } from '@/store/store';
@@ -50,9 +49,6 @@ export default function Groups() {
             ) : (
                 <CreateGroupForm onSuccess={() => setShowForm(false)} />
             )}
-
-            {console.log('data->', data)
-            }
 
             <div className="mt-4 space-y-4">
                 {data?.items.map((group) => (

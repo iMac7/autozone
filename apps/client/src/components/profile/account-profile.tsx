@@ -1,15 +1,14 @@
 import { useCredentialStore } from "@/store/store";
 import { client } from "@/utils/client";
 import { evmAddress } from "@lens-protocol/client";
-import { fetchAccount, fetchAppUsers } from "@lens-protocol/client/actions";
+import { fetchAccount } from "@lens-protocol/client/actions";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { app_address, backend_url } from "@/utils/env";
+import { backend_url } from "@/utils/env";
 import { UpdateProfile } from "../forms/update-profile";
 import { useState } from "react";
 import { ShareVehiclesWithDimo } from "@dimo-network/login-with-dimo";
 import { Input } from "../ui/input";
-import { getSession } from "@/utils/auth/auth";
 import axios from "axios"
 import { useAccount } from "wagmi";
 

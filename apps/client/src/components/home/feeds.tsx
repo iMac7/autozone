@@ -2,21 +2,15 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { CreateFeedForm } from "../forms/create-feed";
 import { useQuery } from "@tanstack/react-query";
-import { fetchAppFeeds, fetchFeed, fetchFeeds } from "@lens-protocol/client/actions";
+import { fetchFeeds } from "@lens-protocol/client/actions";
 import { evmAddress } from "@lens-protocol/client";
-import { app_address, signer_address } from "@/utils/env";
+import { signer_address } from "@/utils/env";
 import { client } from "@/utils/client";
-import { checkAuthStatus, loginAsAccountOwner } from "@/utils/auth/auth";
-import { walletClient } from "@/utils/viem";
-import { useCredentialStore } from "@/store/store";
 import { useNavigate } from "react-router";
 
 
 export default function Feeds() {
     const [showForm, setShowForm] = useState(false);
-    const [singleFeed, setSingleFeed] = useState<any | null>(null);
-
-    const lens_address = useCredentialStore(state => state.lens_address)
 
     const navigate = useNavigate()
 
@@ -46,32 +40,6 @@ export default function Feeds() {
             throw error
         }
     }
-
-    const handleFetchSingleFeed = async () => {
-        try {
-            // const result = await fetchFeed(client, {
-            //     txHash: feedAddress
-            // });
-
-            const result = await fetchFeeds(client, {
-                filter: {
-                  managedBy: {
-                    address: evmAddress(walletClient.account!.address)
-                  }
-                
-                }});
-
-            if (result.isErr()) {
-                console.error(result.error);
-                return;
-            }
-
-            // setSingleFeed(result.value);
-            console.log('singleFeed result->', result);
-        } catch (error) {
-            console.error('Error fetching single feed:', error);
-        }
-    };
 
     return <div className="h-full overflow-y-auto">
         {/* <Button onClick={fetch_Feeds}>Fetch Single Feed</Button>
@@ -105,7 +73,7 @@ export default function Feeds() {
         {showForm ?
             <CreateFeedForm onSuccess={() => setShowForm(false)} />
             : <Button
-                className="border-2 border-white absolute bottom-2 right-2 opacity-60 hover:opacity-100 transition-opacity duration-300"
+                className="border-2 border-white absolute bottom-10 md:bottom-2 right-2 opacity-60 hover:opacity-100 transition-opacity duration-300"
                 onClick={() => setShowForm(!showForm)}
             >
                 Create Feed

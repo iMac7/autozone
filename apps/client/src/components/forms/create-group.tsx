@@ -59,11 +59,11 @@ export function CreateGroupForm({ onSuccess }: CreateGroupFormProps) {
       const result = await createGroup(sessionClient!, {
         metadataUri: uri(metadataUri),
       })
-        .andThen(handleWith(walletClient))
+        .andThen(handleWith(walletClient as any))
         .andThen(sessionClient!.waitForTransaction);
 
       if (result.isOk()) {
-        onSuccess?.(result.value);
+        onSuccess?.();
         form.reset();
       } else {
         form.setError("root", {

@@ -16,27 +16,30 @@ export default function Feed() {
 
     const { data: posts, isLoading: postsIsLoading, error: postsError, refetch: refetchPosts } = useQuery({
         queryKey: ['feed_posts', address],
-        queryFn: async () => {
-            if (!address) throw new Error('Address is required');
-
-            const result = await fetchPosts(client, {
-                filter: {
-                    feeds: [{ feed: evmAddress(address) }],
-                    postTypes: [PostType.Root, PostType.Repost, PostType.Quote]
-                }
-            })
-
-            console.log('valuee->', result);
-            if (result.isErr()) {
-                throw result.error;
-            }
-
-            return result.value;
-        },
+        queryFn: fetchposts,
         enabled: !!address,
     });
 
-    const { data: feed, isLoading: feedIsLoading, error: feedError, refetch: refetchFeed } = useQuery({
+    async function fetchposts() {        
+        if (!address) throw new Error('Address is required');
+
+        const result = await fetchPosts(client, {
+            filter: {
+                feeds: [{ feed: evmAddress(address) }],
+                postTypes: [PostType.Root, PostType.Repost, PostType.Quote]
+            },
+            cursor: null
+        })
+
+        console.log('valuee->', result);
+        if (result.isErr()) {
+            throw result.error;
+        }
+
+        return result.value;
+    }
+
+    const { data: feed, isLoading: feedIsLoading, error: feedError } = useQuery({
         queryKey: ['feed', address],
         queryFn: async () => {
             if (!address) throw new Error('Address is required');
@@ -60,7 +63,7 @@ export default function Feed() {
                 <Button onClick={() => navigate(-1)}>Back</Button>
                 <div className="">
                     <h2 className="text-2xl font-bold">{feed?.metadata?.name}</h2>
-                    <p className="text-sm">{feedIsLoading ? 'loading ...' : feed?.metadata?.description}</p>
+                    <p className="text-sm">{!feedError && feedIsLoading ? 'loading ...' : feed?.metadata?.description}</p>
                 </div>
             </header>
             <div className="relative h-full overflow-y-auto">

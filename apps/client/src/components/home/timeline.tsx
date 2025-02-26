@@ -1,9 +1,9 @@
 import { client } from "@/utils/client";
 import { evmAddress } from "@lens-protocol/client";
-import { currentSession, fetchTimeline } from "@lens-protocol/client/actions";
+import { fetchTimeline } from "@lens-protocol/client/actions";
 import { Button } from "@/components/ui/button";
 import { useCredentialStore } from "@/store/store";
-import { checkAuthStatus, getSession } from "@/utils/auth/auth";
+import { checkAuthStatus } from "@/utils/auth/auth";
 import { app_address } from "@/utils/env";
 
 
@@ -28,7 +28,7 @@ export default function Timeline() {
             return console.error(result.error);
         }
 
-        const { items, pageInfo } = result.value;
+        const { items } = result.value;
         console.log('tl items=', items)
     }
 

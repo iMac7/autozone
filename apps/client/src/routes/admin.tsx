@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { create_App } from "@/utils/auth/auth";
 import { client } from "@/utils/client";
 import { storageClient } from "@/utils/storageclient";
 import { txHash } from "@lens-protocol/client";
@@ -65,7 +64,7 @@ export default function Admin() {
     return (
         <div>
             <h1>Admin</h1>
-            <Button onClick={create_App}>Create App</Button>
+            <Button onClick={() => { }}>Create App</Button>
 
             <div className="mt-4">
                 <input
@@ -92,12 +91,12 @@ export default function Admin() {
                     </Button>
                 )}
 
-                {/* {uploadedUrl && (
-          <div>
-            <h3>Uploaded URL:</h3>
-            <p className="break-all">{uploadedUrl}</p>
-          </div>
-        )} */}
+                {uploadedUrl && (
+                    <div>
+                        <h3>Uploaded URL:</h3>
+                        <p className="break-all">{uploadedUrl}</p>
+                    </div>
+                )}
             </div>
 
             <div>

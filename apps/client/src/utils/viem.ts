@@ -1,7 +1,7 @@
 import "viem/window";
 
 import { chains } from "@lens-network/sdk/viem";
-import { type Address, createWalletClient, custom, type WalletClient } from "viem";
+import { createWalletClient, custom, type WalletClient } from "viem";
 
 
 
