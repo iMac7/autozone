@@ -77,7 +77,9 @@ export default function SideContent() {
         </TableHeader>
         <TableBody>
           {vehicles.map((vehicle, i) =>
-            <TableRow className={i%2==0?'bg-white':''}>
+            <TableRow 
+            key={i}
+            className={i%2==0?'bg-white':''}>
               <TableCell className="font-bold text-center w-[30px]">{i+1}</TableCell>
               <TableCell className="w-[150px]">{vehicle.model}</TableCell>
               <TableCell className="font-medium">{vehicle.averageSpeed}</TableCell>
