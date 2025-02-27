@@ -1,13 +1,9 @@
 {
-  "name": "autozone",
   "private": true,
-  "scripts": {
-    "dev": "pnpm -r dev",
-    "build": "pnpm -r build",
-    "start": "pnpm -r start"
-  },
-  "devDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "packageManager": "pnpm@9.0.6+sha1.648f6014eb363abb36618f2ba59282a9eeb3e879"
+  "name": "autozone",
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/client"
+  ],
+  "packageManager": "yarn@1.22.22+sha256.c17d3797fb9a9115bf375e31bfd30058cac6bc9c3b8807a3d8cb2094794b51ca"
 }
