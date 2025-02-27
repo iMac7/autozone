@@ -58,7 +58,7 @@ export default function Account() {
 
 
   return (
-    <div className=''>
+    <div className='pb-16 md:pb-0'>
       <div className="w-full p-4 flex justify-center items-center bg-black">
         <LoginWithDimo
           mode='popup'

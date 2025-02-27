@@ -75,9 +75,9 @@ export default function AccountProfile() {
     }
 
     return (
-        <div className="w-[40rem] mx-auto p-6 bg-white rounded-lg relative">
+        <div className="bg-white rounded-lg relative">
             {/* {console.log('accdata-->', accountData)} */}
-            <div className="space-y-6">
+            <div className="space-y-6 p-6">
                 <div className="flex items-center space-x-4">
                     <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
                         {accountData.metadata?.picture ? (
@@ -138,8 +138,8 @@ export default function AccountProfile() {
             </div>
             <hr className="my-2" />
 
-            <h2 className="font-bold text-xl">MY VEHICLE</h2>
-            <div className="my-2 flex justify-center items-center bg-black p-2">
+            <h2 className="font-bold text-xl ml-4">MY VEHICLE</h2>
+            <div className="w-full my-2 flex justify-center items-center bg-black p-2">
                 <ShareVehiclesWithDimo
                     mode="popup"
                     permissionTemplateId="1,3,4,5,6"

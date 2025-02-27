@@ -1,6 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { CreateFeedForm } from "../forms/create-feed";
 import { useQuery } from "@tanstack/react-query";
 import { fetchFeeds } from "@lens-protocol/client/actions";
 import { evmAddress } from "@lens-protocol/client";
@@ -10,7 +8,7 @@ import { useNavigate } from "react-router";
 
 
 export default function Feeds() {
-    const [showForm, setShowForm] = useState(false);
+    // const [showForm, setShowForm] = useState(false);
 
     const navigate = useNavigate()
 
@@ -70,7 +68,7 @@ export default function Feeds() {
         
 
 
-        {showForm ?
+        {/* {showForm ?
             <CreateFeedForm onSuccess={() => setShowForm(false)} />
             : <Button
                 className="border-2 border-white absolute bottom-10 md:bottom-2 right-2 opacity-60 hover:opacity-100 transition-opacity duration-300"
@@ -78,6 +76,6 @@ export default function Feeds() {
             >
                 Create Feed
             </Button>
-        }
+        } */}
     </div>;
 }

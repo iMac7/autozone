@@ -12,7 +12,7 @@ export default function Profile() {
   const sections = lens_address 
     ? [
         { name: 'Profile', component: <AccountProfile /> },
-        { name: 'Posts', component: <Posts /> },
+        { name: 'My Posts', component: <Posts /> },
         { name: 'Accounts', component: <Accounts /> }
       ]
     : [

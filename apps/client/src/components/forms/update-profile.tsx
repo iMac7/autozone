@@ -85,7 +85,7 @@ export function UpdateProfile({ profile, setUpdateProfile }: { profile: any, set
 
 
     return (
-        <div className="p-6 inset-0 overflow-y-auto border-2 border-gray-300 absolute top-0 z-10 bg-white rounded-lg">
+        <div className="p-6 w-full max-w-screen overflow-y-auto border-2 border-gray-300 absolute inset-0 z-10 bg-white rounded-lg">
 
             <p className="text-2xl font-bold underline">Update Account</p>
             <p className="my-4 text-xs">Please refresh in case of errors updating account.</p>
