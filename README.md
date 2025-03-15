@@ -1,4 +1,5 @@
-# The go-to social app for dimo vehicles (👀 soon)
+## TODO:
+find other way to manage private keys. Mobile wallets are not it 🤕
 
 ## Roadmap for the near future
 
